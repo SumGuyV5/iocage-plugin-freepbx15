@@ -1,0 +1,46 @@
+#!/bin/sh
+
+SHOWSSL=TRUE
+MESSAGE="Can not show ssl private.key or certificate.crt... Change SNOWSSL to TRUE the /usr/local/bin/freepbx15get script."
+
+get_all()
+{
+  get_sslkey
+  get_sslcert
+  get_apacheconf
+}
+
+get_sslkey()
+{
+  if [ $SHOWSSL = TRUE ] ; then
+    sslkey=$(cat /usr/local/etc/apache24/ssl/private.key)
+  else
+    sslkey=$MESSAGE
+  fi
+  echo "$sslkey"
+}
+
+get_sslcert()
+{
+  if [ $SHOWSSL = TRUE ] ; then
+    sslcert=$(cat /usr/local/etc/apache24/ssl/certificate.crt)
+  else
+    sslcert=$MESSAGE
+  fi
+  echo "$sslcert"
+}
+
+get_apacheconf()
+{
+  apacheconf=$(cat /usr/local/etc/apache24/Includes/freepbx15.conf)
+  echo "$apacheconf"
+}
+
+# Stub for something which gets quasselsettings
+case $1 in
+  getall) get_all ;;
+	sslkey) get_sslkey ;;
+	sslcert) get_sslcert ;;
+  apacheconf) get_apacheconf ;;
+	*) echo "Unknown option" ;;
+esac
