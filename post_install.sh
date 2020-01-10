@@ -151,14 +151,3 @@ mysqladmin -u root password '$MYSQL_PASS'
   
 /usr/local/freepbx/bin/fwconsole set CERTKEYLOC /usr/local/etc/asterisk/keys
 /usr/local/freepbx/sbin/fwconsole reload
-  
-header "FreePBX Modules to not install."
-echo "Call Flow Control - deprecated constructor"
-echo "Digium Phones Config - deprecated constructor"
-  
-echo "Digium Addons - requers RPM binary"
-  
-echo "iSymphonyV3 - deprecated constructor"
-  
-echo "User Control Panel - command line only? sudo /usr/local/freepbx/sbin/fwconsole ma install ucp"
-echo "XMPP - command line only? sudo /usr/local/freepbx/sbin/fwconsole ma install xmpp"
