@@ -1,6 +1,4 @@
 #!/bin/sh -x
-exit 1
-
 FREEPBX_VER="freepbx-15.0-latest.tgz"
 
 MY_SERVER_NAME=$(hostname)
