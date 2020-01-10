@@ -1,105 +1,62 @@
 #!/bin/sh -x
 
-# Enable the service
-sysrc apache24_enable="YES"
-sysrc mysql_enable="YES"
-
-MYSQL_ROOT_PASS=$(openssl rand -base64 20 | md5 | head -c20)
-
-DRUPAL_DB_USER="drupaluser"
-DRUPAL_DB_USER_PASS=$(openssl rand -base64 20 | md5 | head -c20)
-DRUPAL_DB="drupaldb"
-
-DRUPAL_VER="drupal8"
+FREEPBX_VER="freepbx-15.0-latest.tgz"
 
 MY_SERVER_NAME=$(hostname)
-MY_SERVER_NAME_ESC=$(hostname | sed 's/\./\\./g')
-
 IP_ADDRESS=$(ifconfig | grep -E 'inet.[0-9]' | grep -v '127.0.0.1' | awk '{ print $2}')
 
-IP_ESC=$(echo $IP_ADDRESS | sed 's/\./\\./g')
+# Enable the service
+sysrc apache24_enable="YES"
+sysrc asterisk_enable="YES"
+sysrc asterisk_user="asterisk"
+sysrc asterisk_group="asterisk"
+sysrc mysql_enable="YES"
+sysrc mysql_args="--character-set-server=utf8"
 
-# mysql config
- 
-service mysql-server start
-  
-mysql_secure_installation <<EOF
-
-y
-$MYSQL_ROOT_PASS
-$MYSQL_ROOT_PASS
-y
-y
-y
-y
-EOF
-  
-echo 'innodb_large_prefix=true' >> /usr/local/my.cnf
-echo 'innodb_file_format=barracuda' >> /usr/local/my.cnf
-echo 'innodb_file_per_table=true' >> /usr/local/my.cnf 
-  
-mysql -uroot -p$MYSQL_ROOT_PASS <<EOF
-create database ${DRUPAL_DB};
-create user ${DRUPAL_DB_USER}@localhost identified by '${DRUPAL_DB_USER_PASS}';
-grant all privileges on ${DRUPAL_DB}.* to ${DRUPAL_DB_USER}@localhost identified by '${DRUPAL_DB_USER_PASS}';
-flush privileges;
-\q
-EOF
-      
-service mysql-server restart
-
-# drupal config
-
-mkdir -p /usr/local/www/$DRUPAL_VER/sites/default/files/private
-
-echo "Drupal Config Starting...."
-DRUPAL_ADMIN=$(drush -y site-install standard -r /usr/local/www/${DRUPAL_VER} \
-  --db-url="mysql://${DRUPAL_DB_USER}:${DRUPAL_DB_USER_PASS}@localhost/${DRUPAL_DB}" \
-  --site-name=${MY_SERVER_NAME} 2>&1 | grep password)
-echo "Drupal Config Ending....."
-echo $DRUPAL_ADMIN
-DRUPAL_ADMIN=$(echo $DRUPAL_ADMIN | awk '{ print $8}')
-  
-cat >> /usr/local/www/drupal8/sites/default/settings.php << EOF
-\$settings['trusted_host_patterns'] = [
-  '^$MY_SERVER_NAME_ESC$',
-  '^localhost$',
-  '^$IP_ESC$',
-  '^127\.0\.0\.1$',
-];
+#############
+# mysql
+#############
+cat > /usr/local/etc/odbc.ini <<EOF
+[MySQL-asteriskcdrdb]
+Description=MySQL connection to 'asteriskcdrdb' database
+driver=MySQL
+server=localhost
+database=asteriskcdrdb
+Port=3306
+option=3
+Charset=utf8
 EOF
 
-chown -R www:www /usr/local/www/$DRUPAL_VER/
-  
-cat > /usr/local/etc/apache24/Includes/drupal.conf <<EOF
-<VirtualHost *:80>
-  ServerName $MY_SERVER_NAME
-  
-  DocumentRoot /usr/local/www/$DRUPAL_VER
-  <Directory "/usr/local/www/$DRUPAL_VER">
-    Options Indexes FollowSymLinks
-    AllowOverride All
-    Require all granted
-  </Directory>
-</VirtualHost>
-<VirtualHost *:443>
-  ServerName $MY_SERVER_NAME
-  
-  SSLEngine on
-  SSLCertificateFile "/usr/local/etc/apache24/ssl/certificate.crt"
-
-  SSLCertificateKeyFile "/usr/local/etc/apache24/ssl/private.key"
-
-  DocumentRoot /usr/local/www/$DRUPAL_VER
-  <Directory "/usr/local/www/$DRUPAL_VER">
-    Options Indexes FollowSymLinks
-    AllowOverride All
-    Require all granted
-  </Directory>
-</VirtualHost>
+cat > /usr/local/etc/odbcinst.ini <<EOF
+[MySQL]
+Description=ODBC for MySQL
+Driver=/usr/local/lib/libmyodbc5w.so
+UsageCount=20003
 EOF
 
-# apache config
+##############
+# apache
+##############
+cp /usr/local/etc/php.ini-production /usr/local/etc/php.ini
+sed -i.bak 's/\(^upload_max_filesize = \).*/\120M/' /usr/local/etc/php.ini
+sed -i.bak 's/\(^memory_limit = \).*/\1256M/' /usr/local/etc/php.ini
+
+cp /usr/local/etc/apache24/httpd.conf /usr/local/etc/apache24/httpd.conf_orig
+sed -i.bak -E "s/^(User|Group).*/\1 ${ASTERISK_USER}/" /usr/local/etc/apache24/httpd.conf
+sed -i.bak 's/AllowOverride None/AllowOverride All/' /usr/local/etc/apache24/httpd.conf
+  
+sed -i.bak '/^#LoadModule rewrite_module libexec\/apache24\/mod_rewrite.so/s/^#//g' /usr/local/etc/apache24/httpd.conf
+sed -i.bak '/^#LoadModule mime_magic_module libexec\/apache24\/mod_mime_magic.so/s/^#//g' /usr/local/etc/apache24/httpd.conf
+  
+sed -i.bak '/AddType application\/x-httpd-php .php/d' /usr/local/etc/apache24/httpd.conf
+  
+sed -i.bak '/\<IfModule mime_module\>/a\
+    AddType application/x-httpd-php .php
+    ' /usr/local/etc/apache24/httpd.conf
+    
+sed -i.bak 's/DirectoryIndex index.html/DirectoryIndex index.php index.html/' /usr/local/etc/apache24/httpd.conf
+    
+# apache config ssl
 sed -i.bak '/^#LoadModule ssl_module libexec\/apache24\/mod_ssl.so/s/^#//g' /usr/local/etc/apache24/httpd.conf
   
 mkdir -p /usr/local/etc/apache24/ssl
@@ -110,30 +67,98 @@ openssl req -new -x509 -days 365 -key private.key -out certificate.crt -sha256 -
   
 cat > /usr/local/etc/apache24/modules.d/020_mod_ssl.conf <<EOF
 Listen 443
-
 SSLProtocol ALL -SSLv2 -SSLv3
-
 SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5
-
 SSLPassPhraseDialog builtin
-
 SSLSessionCacheTimeout 300
 EOF
+        
+cat > /usr/local/etc/apache24/Includes/freepbx.conf <<EOF
+<VirtualHost *:80>
+  ServerName $MY_SERVER_NAME
   
-sed -i.bak '/^#LoadModule rewrite_module libexec\/apache24\/mod_rewrite.so/s/^#//g' /usr/local/etc/apache24/httpd.conf
+  DocumentRoot /usr/local/www/freepbx/admin
+  <Directory "/usr/local/www/freepbx/admin">
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Require all granted
+  </Directory>
+</VirtualHost>
+
+<VirtualHost *:443>
+  ServerName $MY_SERVER_NAME
   
-sed -i.bak '/^#LoadModule mime_magic_module libexec\/apache24\/mod_mime_magic.so/s/^#//g' /usr/local/etc/apache24/httpd.conf
+  SSLEngine on
+  SSLCertificateFile "/usr/local/etc/apache24/ssl/certificate.crt"
+  SSLCertificateKeyFile "/usr/local/etc/apache24/ssl/private.key"
+  DocumentRoot /usr/local/www/freepbx/admin
+  <Directory "/usr/local/www/freepbx/admin">
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Require all granted
+  </Directory>
+</VirtualHost>
+EOF
+
+###############
+# start service
+###############
+service asterisk restart
+service mysql-server restart
+service apache24 restart
+
+###############
+# FreePBX
+###############
+
+MYSQL_PASS=$(tail -1 /root/.mysql_secret)
+mysqladmin -u root -p$MYSQL_PASS password ''
+  
+mkdir -p /usr/src
+cd /usr/src
+
+MIRROR="mirror"
+while [ ! -f "$FREEPBX_VER" ]
+do
+  URL=http://$MIRROR.freepbx.org/modules/packages/freepbx/$FREEPBX_VER
+  header $URL
+  fetch http://$MIRROR.freepbx.org/modules/packages/freepbx/$FREEPBX_VER
+  sleep 1
+  case "$MIRROR" in
+    mirror)
+      MIRROR="mirror1"
+        ;;
+    mirror1)
+      MIRROR="mirror2"
+        ;;
+    *)
+      MIRROR="mirror"
+        ;;
+  esac      
+done
+rm -R freepbx
+tar vxfz $FREEPBX_VER
     
-sed -i.bak '/AddType application\/x-httpd-php .php/d' /usr/local/etc/apache24/httpd.conf
-sed -i.bak '/\<IfModule mime_module\>/a\
-AddType application/x-httpd-php .php
-' /usr/local/etc/apache24/httpd.conf
+cd freepbx
+touch /usr/local/etc/asterisk/{modules,ari,statsd}.conf
+./install -n
 
-# Start the service
-service apache24 restart 2>/dev/null
-service mysql-server restart 2>/dev/null
-
-echo "drupal8 now installed.\n" > /root/PLUGIN_INFO
-echo "\nYour MySQL Root password is \"${MYSQL_ROOT_PASS}\".\n" > /root/PLUGIN_INFO
-echo "\nYour Drupal Database password is \"${DRUPAL_DB_USER_PASS}\".\n" > /root/PLUGIN_INFO
-echo "\nDrupal Admin user Password is \"${DRUPAL_ADMIN}\".\n" > /root/PLUGIN_INFO
+###############
+# post install
+###############
+MYSQL_PASS=$(tail -1 /root/.mysql_secret)
+mysqladmin -u root password '$MYSQL_PASS'
+  
+/usr/local/freepbx/bin/fwconsole set CERTKEYLOC /usr/local/etc/asterisk/keys
+/usr/local/freepbx/sbin/fwconsole reload
+  
+header "FreePBX Modules to not install."
+echo "Call Flow Control - deprecated constructor"
+echo "Digium Phones Config - deprecated constructor"
+  
+echo "Digium Addons - requers RPM binary"
+  
+echo "iSymphonyV3 - deprecated constructor"
+  
+echo "User Control Panel - command line only? sudo /usr/local/freepbx/sbin/fwconsole ma install ucp"
+echo "XMPP - command line only? sudo /usr/local/freepbx/sbin/fwconsole ma install xmpp"
