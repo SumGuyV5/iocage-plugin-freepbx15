@@ -17,8 +17,8 @@
                 },
                 "apacheconf": {
                         "type": "string",
-                        "name": "Apache Drupal Config",
-                        "description": "Apache Drupal Config.",
+                        "name": "Apache FreePBX Config",
+                        "description": "Apache FreePBX Config.",
                         "requirerestart": true
                 },
         }
