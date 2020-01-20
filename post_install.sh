@@ -191,7 +191,7 @@ tar vxfz $FREEPBX_VER
     
 cd freepbx
 touch /usr/local/etc/asterisk/{modules,ari,statsd}.conf
-./install -n
+#./install -n
 
 ###############
 # post install
