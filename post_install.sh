@@ -1,4 +1,3 @@
-
 #!/bin/sh -x
 FREEPBX_VER="freepbx-15.0-latest.tgz"
 
@@ -162,44 +161,44 @@ y
 y
 EOF
 
-mysqladmin -u root -p$MYSQL_ROOT_PASS password ''
+#mysqladmin -u root -p$MYSQL_ROOT_PASS password ''
   
-mkdir -p /usr/src
-cd /usr/src
+#mkdir -p /usr/src
+#cd /usr/src
 
-MIRROR="mirror"
-while [ ! -f "$FREEPBX_VER" ]
-do
-  URL=http://$MIRROR.freepbx.org/modules/packages/freepbx/$FREEPBX_VER
-  header $URL
-  fetch http://$MIRROR.freepbx.org/modules/packages/freepbx/$FREEPBX_VER
-  sleep 1
-  case "$MIRROR" in
-    mirror)
-      MIRROR="mirror1"
-        ;;
-    mirror1)
-      MIRROR="mirror2"
-        ;;
-    *)
-      MIRROR="mirror"
-        ;;
-  esac      
-done
-rm -R freepbx
-tar vxfz $FREEPBX_VER
+#MIRROR="mirror"
+#while [ ! -f "$FREEPBX_VER" ]
+#do
+#  URL=http://$MIRROR.freepbx.org/modules/packages/freepbx/$FREEPBX_VER
+#  header $URL
+#  fetch http://$MIRROR.freepbx.org/modules/packages/freepbx/$FREEPBX_VER
+#  sleep 1
+#  case "$MIRROR" in
+#    mirror)
+#      MIRROR="mirror1"
+#        ;;
+#    mirror1)
+#      MIRROR="mirror2"
+#        ;;
+#    *)
+#      MIRROR="mirror"
+#        ;;
+#  esac      
+#done
+#rm -R freepbx
+#tar vxfz $FREEPBX_VER
     
-cd freepbx
-touch /usr/local/etc/asterisk/{modules,ari,statsd}.conf
+#cd freepbx
+#touch /usr/local/etc/asterisk/{modules,ari,statsd}.conf
 #./install -n
 
 ###############
 # post install
 ###############
-mysqladmin -u root password '$MYSQL_ROOT_PASS'
+#mysqladmin -u root password '$MYSQL_ROOT_PASS'
   
-/usr/local/freepbx/bin/fwconsole set CERTKEYLOC /usr/local/etc/asterisk/keys
-/usr/local/freepbx/sbin/fwconsole reload
+#/usr/local/freepbx/bin/fwconsole set CERTKEYLOC /usr/local/etc/asterisk/keys
+#/usr/local/freepbx/sbin/fwconsole reload
 
-echo -e "FreePBX 15 now installed.\n" > /root/PLUGIN_INFO
-echo -e "\nYour MySQL Root password is \"${MYSQL_ROOT_PASS}\".\n" >> /root/PLUGIN_INFO
+#echo -e "FreePBX 15 now installed.\n" > /root/PLUGIN_INFO
+#echo -e "\nYour MySQL Root password is \"${MYSQL_ROOT_PASS}\".\n" >> /root/PLUGIN_INFO
