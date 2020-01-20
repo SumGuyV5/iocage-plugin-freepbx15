@@ -15,12 +15,3 @@ sysrc asterisk_user=$ASTERISK_USER
 sysrc asterisk_group=$ASTERISK_USER
 sysrc mysql_enable="YES"
 sysrc mysql_args="--character-set-server=utf8"
-
-
-#####################
-# Linux compatablity
-#####################
-mkdir /home/asterisk
-chown asterisk:asterisk /home/asterisk
-pw usermod asterisk -d /home/asterisk/ -m
-chsh -s /usr/local/bin/bash asterisk
