@@ -36,11 +36,18 @@ get_apacheconf()
   echo "$apacheconf"
 }
 
+get_fwconsolereload()
+{
+  fwconsolereload=$(/usr/local/freepbx/bin/fwconsole reload --verbose
+  echo "$fwconsolereload" 
+}
+
 # Stub for something which gets quasselsettings
 case $1 in
   getall) get_all ;;
-	sslkey) get_sslkey ;;
-	sslcert) get_sslcert ;;
+  sslkey) get_sslkey ;;
+  sslcert) get_sslcert ;;
   apacheconf) get_apacheconf ;;
-	*) echo "Unknown option" ;;
+  fwconsolereload) get_fwconsolereload ;;
+  *) echo "Unknown option" ;;
 esac

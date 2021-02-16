@@ -40,9 +40,9 @@ set_apacheconf()
 
 # Stub for something which sets quasselsettings
 case $1 in
-	sslkey) set_sslkey "$@" ;;
-	sslcert) set_sslcert "$@" ;;
-	apacheconf) set_apacheconf "$@" ;;
+  sslkey) set_sslkey "$@" ;;
+  sslcert) set_sslcert "$@" ;;
+  apacheconf) set_apacheconf "$@" ;;
   adminpasswd) set_adminpasswd $2 ;;
-	*) echo "Unknown option" ;;
+  *) echo "Unknown option" ;;
 esac
