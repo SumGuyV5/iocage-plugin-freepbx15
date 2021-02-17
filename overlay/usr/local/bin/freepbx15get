@@ -38,7 +38,7 @@ get_apacheconf()
 
 get_fwconsolereload()
 {
-  fwconsolereload=$(/usr/local/freepbx/bin/fwconsole reload --verbose
+  fwconsolereload=$(/usr/local/freepbx/bin/fwconsole reload --verbose)
   echo "$fwconsolereload" 
 }
 
