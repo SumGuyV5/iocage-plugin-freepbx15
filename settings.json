@@ -21,11 +21,11 @@
                         "description": "Apache FreePBX Config.",
                         "requirerestart": true
                 },
-                "fwconsolereload": {
+		"fwconsolereload": {
                         "type": "string",
                         "name": "FreePBX Reload",
                         "description": "FreePBX Reload.",
                         "requirerestart": false
-                }
+                },
         }
 }
