@@ -212,7 +212,7 @@ mysqladmin -u root password '$MYSQL_ROOT_PASS'
 #/usr/local/freepbx/bin/fwconsole reload
 /usr/local/freepbx/bin/fwconsole restart
 
-#service apache24 restart
+service apache24 restart
 
 echo -e "FreePBX 15 now installed." > /root/PLUGIN_INFO
 echo -e "     Your MySQL Root password is \"${MYSQL_ROOT_PASS}\"." >> /root/PLUGIN_INFO
