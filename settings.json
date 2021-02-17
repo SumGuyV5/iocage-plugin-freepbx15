@@ -26,6 +26,6 @@
                         "name": "FreePBX Reload",
                         "description": "FreePBX Reload.",
                         "requirerestart": false
-                },
+                }
         }
 }
