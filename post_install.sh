@@ -196,8 +196,10 @@ mysqladmin -u root password '$MYSQL_ROOT_PASS'
 
 service apache24 restart
 
-chown -R asterisk:asterisk /usr/local/{etc,lib}/asterisk
-chown -R asterisk:asterisk /var/{log,spool}/asterisk
+chown -R asterisk:asterisk /usr/local/etc/asterisk
+chown -R asterisk:asterisk /usr/local/lib/asterisk
+chown -R asterisk:asterisk /var/spool/asterisk
+chown -R asterisk:asterisk /var/log/asterisk
 chown -R asterisk:asterisk /usr/local/www/freepbx
 chown -R asterisk:asterisk /var/log/asterisk/freepbx.log
 
