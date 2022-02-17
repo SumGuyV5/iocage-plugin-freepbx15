@@ -5,49 +5,49 @@ MESSAGE="Can not show ssl private.key or certificate.crt... Change SNOWSSL to TR
 
 get_all()
 {
-  get_sslkey
-  get_sslcert
-  get_apacheconf
+	get_sslkey
+	get_sslcert
+	get_apacheconf
 }
 
 get_sslkey()
 {
-  if [ $SHOWSSL = TRUE ] ; then
-    sslkey=$(cat /usr/local/etc/apache24/ssl/private.key)
-  else
-    sslkey=$MESSAGE
-  fi
-  echo "$sslkey"
+	if [ $SHOWSSL = TRUE ] ; then
+		sslkey=$(cat /usr/local/etc/apache24/ssl/private.key)
+	else
+		sslkey=$MESSAGE
+	fi
+	echo "$sslkey"
 }
 
 get_sslcert()
 {
-  if [ $SHOWSSL = TRUE ] ; then
-    sslcert=$(cat /usr/local/etc/apache24/ssl/certificate.crt)
-  else
-    sslcert=$MESSAGE
-  fi
-  echo "$sslcert"
+	if [ $SHOWSSL = TRUE ] ; then
+		sslcert=$(cat /usr/local/etc/apache24/ssl/certificate.crt)
+	else
+		sslcert=$MESSAGE
+	fi
+	echo "$sslcert"
 }
 
 get_apacheconf()
 {
-  apacheconf=$(cat /usr/local/etc/apache24/Includes/freepbx15.conf)
-  echo "$apacheconf"
+	apacheconf=$(cat /usr/local/etc/apache24/Includes/freepbx15.conf)
+	echo "$apacheconf"
 }
 
 get_fwconsolereload()
 {
-  fwconsolereload=$(/usr/local/freepbx/bin/fwconsole reload --verbose)
-  echo "$fwconsolereload" 
+	fwconsolereload=$(/usr/local/freepbx/bin/fwconsole reload --verbose)
+	echo "$fwconsolereload" 
 }
 
 # Stub for something which gets quasselsettings
 case $1 in
-  getall) get_all ;;
-  sslkey) get_sslkey ;;
-  sslcert) get_sslcert ;;
-  apacheconf) get_apacheconf ;;
-  fwconsolereload) get_fwconsolereload ;;
-  *) echo "Unknown option" ;;
+	getall) get_all ;;
+	sslkey) get_sslkey ;;
+	sslcert) get_sslcert ;;
+	apacheconf) get_apacheconf ;;
+	fwconsolereload) get_fwconsolereload ;;
+	*) echo "Unknown option" ;;
 esac

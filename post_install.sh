@@ -25,7 +25,7 @@ mkdir /home/asterisk
 chown asterisk:asterisk /home/asterisk
 pw usermod asterisk -d /home/asterisk/ -m
 chsh -s /usr/local/bin/bash asterisk
-  
+
 #simple script to take the runuser command that FreePBX uses and turn it in to su command.
 cat > /usr/local/bin/runuser <<EOF
 #!/bin/sh
@@ -74,14 +74,14 @@ sed -i.bak '/^#LoadModule mime_magic_module libexec\/apache24\/mod_mime_magic.so
 sed -i.bak '/AddType application\/x-httpd-php .php/d' /usr/local/etc/apache24/httpd.conf
   
 sed -i.bak '/\<IfModule mime_module\>/a\
-    AddType application/x-httpd-php .php
-    ' /usr/local/etc/apache24/httpd.conf
-    
+	AddType application/x-httpd-php .php
+	' /usr/local/etc/apache24/httpd.conf
+
 sed -i.bak 's/DirectoryIndex index.html/DirectoryIndex index.php index.html/' /usr/local/etc/apache24/httpd.conf
-    
+
 # apache config ssl
 sed -i.bak '/^#LoadModule ssl_module libexec\/apache24\/mod_ssl.so/s/^#//g' /usr/local/etc/apache24/httpd.conf
-  
+
 mkdir -p /usr/local/etc/apache24/ssl
 cd /usr/local/etc/apache24/ssl
 
@@ -89,9 +89,9 @@ cd /usr/local/etc/apache24/ssl
 #openssl genrsa -rand -genkey -out private.key 2048
 #Replacement line
 openssl genrsa -out private.key 2048
-  
+
 openssl req -new -x509 -days 365 -key private.key -out certificate.crt -sha256 -subj "/C=CA/ST=ONTARIO/L=TORONTO/O=Global Security/OU=IT Department/CN=${MY_SERVER_NAME}"
-  
+
 cat > /usr/local/etc/apache24/modules.d/020_mod_ssl.conf <<EOF
 Listen 443
 SSLProtocol ALL -SSLv2 -SSLv3
@@ -99,31 +99,31 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5
 SSLPassPhraseDialog builtin
 SSLSessionCacheTimeout 300
 EOF
-        
+
 cat > /usr/local/etc/apache24/Includes/freepbx.conf <<EOF
 <VirtualHost *:80>
-  ServerName $MY_SERVER_NAME
-  
-  DocumentRoot /usr/local/www/freepbx/admin
-  <Directory "/usr/local/www/freepbx/admin">
-    Options Indexes FollowSymLinks
-    AllowOverride All
-    Require all granted
-  </Directory>
+	ServerName $MY_SERVER_NAME
+
+	DocumentRoot /usr/local/www/freepbx/admin
+	<Directory "/usr/local/www/freepbx/admin">
+		Options Indexes FollowSymLinks
+		AllowOverride All
+		Require all granted
+	</Directory>
 </VirtualHost>
 
 <VirtualHost *:443>
-  ServerName $MY_SERVER_NAME
-  
-  SSLEngine on
-  SSLCertificateFile "/usr/local/etc/apache24/ssl/certificate.crt"
-  SSLCertificateKeyFile "/usr/local/etc/apache24/ssl/private.key"
-  DocumentRoot /usr/local/www/freepbx/admin
-  <Directory "/usr/local/www/freepbx/admin">
-    Options Indexes FollowSymLinks
-    AllowOverride All
-    Require all granted
-  </Directory>
+	ServerName $MY_SERVER_NAME
+
+	SSLEngine on
+	SSLCertificateFile "/usr/local/etc/apache24/ssl/certificate.crt"
+	SSLCertificateKeyFile "/usr/local/etc/apache24/ssl/private.key"
+	DocumentRoot /usr/local/www/freepbx/admin
+	<Directory "/usr/local/www/freepbx/admin">
+		Options Indexes FollowSymLinks
+		AllowOverride All
+		Require all granted
+	</Directory>
 </VirtualHost>
 EOF
 
@@ -148,17 +148,6 @@ DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
 FLUSH PRIVILEGES;
 EOF
 
-#mysql_secure_installation <<EOF
-#
-#y
-#$MYSQL_ROOT_PASS
-#$MYSQL_ROOT_PASS
-#y
-#y
-#y
-#y
-#EOF
-
 mysqladmin -u root -p$MYSQL_ROOT_PASS password ''
 
 ###############
@@ -170,24 +159,18 @@ cd /usr/src
 MIRROR="mirror"
 while [ ! -f "$FREEPBX_VER" ]
 do
-  URL=http://$MIRROR.freepbx.org/modules/packages/freepbx/$FREEPBX_VER
-  fetch http://$MIRROR.freepbx.org/modules/packages/freepbx/$FREEPBX_VER
-  sleep 1
-  case "$MIRROR" in
-    mirror)
-      MIRROR="mirror1"
-        ;;
-    mirror1)
-      MIRROR="mirror2"
-        ;;
-    *)
-      MIRROR="mirror"
-        ;;
-  esac      
+	URL=http://$MIRROR.freepbx.org/modules/packages/freepbx/$FREEPBX_VER
+	fetch http://$MIRROR.freepbx.org/modules/packages/freepbx/$FREEPBX_VER
+	sleep 1
+	case "$MIRROR" in
+		mirror) MIRROR="mirror1" ;;
+		mirror1) MIRROR="mirror2" ;;
+		*) MIRROR="mirror" ;;
+	esac
 done
 rm -R freepbx
 tar vxfz $FREEPBX_VER
-    
+
 cd freepbx
 touch /usr/local/etc/asterisk/{modules,ari,statsd}.conf
 ./install -n
@@ -195,8 +178,6 @@ touch /usr/local/etc/asterisk/{modules,ari,statsd}.conf
 ###############
 # post install
 ###############
-chown asterisk:asterisk /usr/local/etc/asterisk/*
-
 ln -s /usr/local/freepbx/sbin/fwconsole /usr/local/sbin/fwconsole
 #sed -i.bak -E 's/(:path=\/sbin \/bin \/usr\/sbin \/usr\/bin \/usr\/local\/sbin \/usr\/local\/bin ~\/bin).*/\1 \/usr\/local\/freepbx\/sbin \/usr\/local\/freepbx\/bin:\\/' /etc/login.conf
 
@@ -206,13 +187,23 @@ mysqladmin -u root password '$MYSQL_ROOT_PASS'
 /usr/local/freepbx/bin/fwconsole ma installall
 /usr/local/freepbx/bin/fwconsole ma delete firewall
 /usr/local/freepbx/bin/fwconsole ma delete xmpp
+/usr/local/freepbx/bin/fwconsole ma install voicemail
 /usr/local/freepbx/bin/fwconsole reload
-  
+
 /usr/local/freepbx/bin/fwconsole set CERTKEYLOC /usr/local/etc/asterisk/keys
 #/usr/local/freepbx/bin/fwconsole reload
 /usr/local/freepbx/bin/fwconsole restart
 
 service apache24 restart
 
+chown -R asterisk:asterisk /usr/local/{etc,lib}/asterisk
+chown -R asterisk:asterisk /var/{log,spool}/asterisk
+chown -R asterisk:asterisk /usr/local/www/freepbx
+chown -R asterisk:asterisk /var/log/asterisk/freepbx.log
+
+chown asterisk:asterisk /etc/amportal.conf
+chmod 660 /etc/amportal.conf
+
 echo -e "FreePBX 15 now installed." > /root/PLUGIN_INFO
 echo -e "     Your MySQL Root password is \"${MYSQL_ROOT_PASS}\"." >> /root/PLUGIN_INFO
+echo -e "     Point your web browser to https://${IP_ADDRESS} and finish setup." >> /root/PLUGIN_INFO

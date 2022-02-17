@@ -1,31 +1,31 @@
 {
-        "servicerestart": "service apache24 restart",
-        "serviceget": "/usr/local/bin/freepbx15get",
-        "serviceset": "/usr/local/bin/freepbx15set",
-        "options": {
-                "sslkey": {
-                        "type": "string",
-                        "name": "SSL Private Key",
-                        "description": "Put your SSL Private Key here.",
-                        "requirerestart": true
-                },
-                "sslcert": {
-                        "type": "string",
-                        "name": "SSL Certificate",
-                        "description": "Put your SSL Certificate here.",
-                        "requirerestart": true
-                },
-                "apacheconf": {
-                        "type": "string",
-                        "name": "Apache FreePBX Config",
-                        "description": "Apache FreePBX Config.",
-                        "requirerestart": true
-                },
-		            "fwconsolereload": {
-                        "type": "string",
-                        "name": "FreePBX Reload",
-                        "description": "FreePBX Reload.",
-                        "requirerestart": false
-                }
-        }
+	"servicerestart": "service apache24 restart",
+	"serviceget": "/usr/local/bin/freepbx15get",
+	"serviceset": "/usr/local/bin/freepbx15set",
+	"options": {
+		"sslkey": {
+			"type": "string",
+			"name": "SSL Private Key",
+			"description": "Put your SSL Private Key here.",
+			"requirerestart": true
+		},
+		"sslcert": {
+			"type": "string",
+			"name": "SSL Certificate",
+			"description": "Put your SSL Certificate here.",
+			"requirerestart": true
+		},
+		"apacheconf": {
+			"type": "string",
+			"name": "Apache FreePBX Config",
+			"description": "Apache FreePBX Config.",
+			"requirerestart": true
+		},
+			"fwconsolereload": {
+			"type": "string",
+			"name": "FreePBX Reload",
+			"description": "FreePBX Reload.",
+			"requirerestart": false
+		}
+	}
 }
